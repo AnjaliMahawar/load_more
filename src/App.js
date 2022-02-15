@@ -1,17 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-//  { Named Import }
 
 import { Button, Form, Pagination, Table } from 'react-bootstrap';
 import React, { useState } from 'react';
 import swal from 'sweetalert';
 import axios from 'axios';
-//import swal from 'sweetalert';
 
-//const axios = require('axios');
-//const config = //require('./config.json')
-
-// Functional COmpoent
 let handleDlt=(e)=>{
     console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML);
     var del_id =  parseInt(e.target.closest('tr').querySelector('td:first-child').innerHTML)
@@ -38,13 +32,13 @@ let handleDlt=(e)=>{
 }
 
 function App() {
-  //1. State/ Hook Variables
+  //1. State
   const [student,setStudent] = useState({
     data:[]
-  });//Empty Array
-  const [paginationItem,setPaginationItem] = useState([])// Empty Array
+  });
+  const [paginationItem,setPaginationItem] = useState([])
 
-  //2. Functions defination
+  //2. Functions
   
   let goToPage = (e)=>{
     console.log(e.target.innerHTML);
@@ -54,7 +48,7 @@ function App() {
   let first = (e)=>{
     console.log('First');
     if(student.meta.pagination.page !== 1){
-      getStudents(1); // Actual Arguemtn
+      getStudents(1); 
     }
     
     
@@ -79,32 +73,25 @@ function App() {
     }
     
   }
-  let getStudents2 = (e)=>{
-    console.log(student);
+  
   }
-  let getStudents = (pageno=1)=>{// e = event //ES6 Fat arrow functions // default argument
+  let getStudents = (pageno=1)=>{
   
     console.log('good morning')
-    //Alway wrap the api calling code inside trycatch block
+    
     try {
-        //Call the api
-        // Fetch API
-        //AXIOS
-        //What is the api
-        //Fetch API with Promise Chain
+        
         fetch(`http://localhost:1337/api/siblings?pagination[page]=${pageno}&pagination[pageSize]=10`)
         .then((data)=>{
-          //let make data json readable
+        
           return data.json();
         }).then((data)=>{
           console.log(data);
-          //Set karne se pahle
-          //console.log('before set',student);
-          //not set the student data in student hook variable
+          
           setStudent(data);
-          //Set karne ke baad data kya hai
+        
           var start = data.meta.pagination.page
-          var arr = []; //empty array;
+          var arr = []; 
           for (let i = 1; i <= data.meta.pagination.pageCount; i++) {
             if(i == start){
               arr.push(<Pagination.Item active onClick={(e)=>{ goToPage(e) }}>{i}</Pagination.Item>); 
@@ -114,7 +101,7 @@ function App() {
             
           }
           setPaginationItem(arr)
-          //array.map(function(currentValue, index, arr));
+        
         }).catch((err)=>{
           console.log(err);
         });
@@ -122,7 +109,7 @@ function App() {
       console.log(error)
     }
   }
-  //3. Return statement JSX
+  
   return (
     <>
         <div className="d-flex justify-content-center">
@@ -159,7 +146,7 @@ function App() {
                            
                           </td>
                         </tr>
-                    )//JSX
+                    )
                   })
                 }
                 

@@ -1,53 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
-//  { Named Import }
-import { Button, Form, Pagination, Table } from 'react-bootstrap';
+import { Button, Form, Pagination , Table } from 'react-bootstrap';
 import React, { useState } from 'react';
 import swal from 'sweetalert';
-const axios = require('axios');
 
-// Functional COmpoent
-function App4() {
-  //1. State/ Hook Variables
+const axios = require('axios');
+const config = require('./config.json')
+
+function App7() {
+  //1. State
   const [student,setStudent] = useState({
     data:[]
-  });//Empty Array
-  const [paginationItem,setPaginationItem] = useState([])// Empty Array
+  });
+  const [paginationItem,setPaginationItem] = useState([])//  Array
   //2. Functions defination
-  let edit=(e)=>{
-        console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML);
-        var ed= parseInt( e.target.closest('tr').querySelector('td:first-child').innerHTML);
-        console.log(ed);
-        swal({
-          title: "Are you sure?",
-          text: "Once deleted, you will not be able to recover this imaginary file!",
-          icon: "warning",
-          buttons: true,
-          dangerMode: true,
-        })
-        .then( async (willDelete) => {
-          if (willDelete) {
-    
-           //API Call
-           try {
-              //let po = await axios(); 
-              let po = await axios.delete('http://localhost:1337/api/siblings/'+ed); 
-
-              swal("Record Delete Successfully");
-              
-           } catch (error) {
-              console.log(error)
-           }
-          } else {
-            //swal("Your imaginary file is safe!");
-          }
-        });
-
-  }
-
   let handleDelete = (e)=>{
-    //function chaining
-    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML); //e is a event object
+    
+
+    
+    var tr = e.target.closest('tr');
+    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML);
     var delid = parseInt(e.target.closest('tr').querySelector('td:first-child').innerHTML);
     console.log(delid);
     swal({
@@ -60,15 +32,12 @@ function App4() {
     .then( async (willDelete) => {
       if (willDelete) {
 
-       //API Call
+       //axios third party we have to download it 
        try {
-          //let po = await axios(); 
-          let po = await axios.delete('http://localhost:1337/api/siblings/'+delid); 
-          delid.remove()
-          
-          swal("Record Delete Successfully");
+          let po = await axios.delete(`${config.dev_url}/api/siblings/`+delid); 
         
-          
+          tr.remove();
+          swal("Good job!", "You friend is deleted successfully!", "success");
        } catch (error) {
           console.log(error)
        }
@@ -77,76 +46,57 @@ function App4() {
       }
     });
   }
-
   let goToPage = (e)=>{
     console.log(e.target.innerHTML);
     var pageno = parseInt(e.target.innerHTML);
     getStudents(pageno);
   }
-
   let first = (e)=>{
     console.log('First');
     if(student.meta.pagination.page !== 1){
-      getStudents(1); // Actual Arguemtn
+      getStudents(1); 
     }
-
-
+    
+    
   }
-
   let last = (e)=>{
     console.log('Last');
-
     if(student.meta.pagination.page !== student.meta.pagination.pageCount){
       getStudents(student.meta.pagination.pageCount);
     }
-
   }
-
   let prev = (e)=>{
     console.log('Prev');
     if(student.meta.pagination.page !== 1){
       getStudents(student.meta.pagination.page - 1 );
     }
-
-
+    
   }
-
   let next = (e)=>{
     console.log('Next');
     if(student.meta.pagination.page !== student.meta.pagination.pageCount){
       getStudents(student.meta.pagination.page + 1);
     }
-
-
+    
   }
-
-  let getStudents2 = (e)=>{
-    console.log(student);
-
-  }
-  let getStudents = (pageno=1)=>{// e = event //ES6 Fat arrow functions // default argument
-
+  
+  let getStudents = (pageno=1)=>{
+    console.log(config.base_url);
     console.log('good morning')
-    //Alway wrap the api calling code inside trycatch block
+    
     try {
-        //Call the api
-        // Fetch API
-        //AXIOS
-        //What is the api
-        //Fetch API with Promise Chain
-        fetch(`http://localhost:1337/api/siblings?pagination[page]=${pageno}&pagination[pageSize]=10`)
+        
+        fetch(`${config.dev_url}/api/siblings/?pagination[page]=${pageno}&pagination[pageSize]=10`)
         .then((data)=>{
-          //let make data json readable
-          return data.json();
+          
+          return data.json();//its make data readable
         }).then((data)=>{
           console.log(data);
-          //Set karne se pahle
-          //console.log('before set',student);
-          //not set the student data in student hook variable
+          
           setStudent(data);
-          //Set karne ke baad data kya hai
+        
           var start = data.meta.pagination.page
-          var arr = []; //empty array;
+          var arr = []; 
           for (let i = 1; i <= data.meta.pagination.pageCount; i++) {
             if(i == start){
               arr.push(<Pagination.Item active onClick={(e)=>{ goToPage(e) }}>{i}</Pagination.Item>); 
@@ -156,7 +106,7 @@ function App4() {
             
           }
           setPaginationItem(arr)
-          //array.map(function(currentValue, index, arr));
+          
         }).catch((err)=>{
           console.log(err);
         });
@@ -164,17 +114,16 @@ function App4() {
       console.log(error)
     }
   }
-  //3. Return statement JSX
+  
   return (
     <>
         <div className="d-flex justify-content-center">
           <h1>Read Operation</h1>
-         
-         
+          
         </div>
         
-        <br />
-        <br />
+    
+        
         {
           student.data.length > 0 &&
           <React.Fragment>
@@ -197,11 +146,11 @@ function App4() {
                           <td>{arr[index].attributes.name}</td>
                           <td>
                             <Button variant="success" size="sm">View</Button>&nbsp;
-                            <Button variant="primary" onClick={(e)=>{edit(e)}} size="sm">Edit</Button>&nbsp;
+                            <Button variant="primary" size="sm">Edit</Button>&nbsp;
                             <Button variant="danger" onClick={(e)=>{ handleDelete(e) }} size="sm">Delete</Button>
                           </td>
                         </tr>
-                    )//JSX
+                    )
                   })
                 }
                 
@@ -213,7 +162,7 @@ function App4() {
               {
               
                 paginationItem.map(function(currentValue, index, arr){
-                    return currentValue//JSX
+                    return currentValue
                 })
               }
               
@@ -222,8 +171,8 @@ function App4() {
             </Pagination>
           </React.Fragment>
         }
-        <Button className='offset-5 mt-3' onClick={(e)=>{ getStudents() }}>Get_My_Student</Button> 
+        <Button className='mt-3 offset-5' onClick={(e)=>{ getStudents() }}>Get_My_Student</Button>
     </>
   );
 }
-export default App4;
+export default App7;

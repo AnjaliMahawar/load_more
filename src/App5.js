@@ -1,40 +1,40 @@
 import logo from './logo.svg';
 import './App.css';
-//  { Named Import }
 import { Button, Form, Pagination, Table } from 'react-bootstrap';
 import React, { useState } from 'react';
 import swal from 'sweetalert';
 const axios = require('axios');
+const config = require('./config.json');
 
-// Functional COmpoent
-function App5() {
-  //1. State/ Hook Variables
-  const [student,setStudent] = useState({
-    data:[], //array
-    meta:{
-        pagination:{
-            page: '',
-            pageCount: '',
-            pageSize: '',
-            total: ''
-        }
-    } //js object
-  });//Empty Array
-  const [paginationItem,setPaginationItem] = useState([])// Empty Array
+
+function App5(){
+  //1. State
+   const [student,setStudent] = useState({
+      data:[], //array
+       meta:{
+          pagination:{
+             page: '',
+             pageCount: '',
+             pageSize: '',
+             total: ''
+           }
+          } 
+      });
+    const [paginationItem,setPaginationItem] = useState([])// Empty Array
   //2. Functions defination
 
-  let LoadMore=()=>{
-   // alert('ooooo');
-    getStudents(student.meta.pagination.page +1)
-  }
-  
+    let LoadMore=()=>{
+    // alert('ooooo');
+      getStudents(student.meta.pagination.page +1)
+    }
+    
   
   
 
-  let handleDelete = (e)=>{
-    //function chaining
+    let handleDelete = (e)=>{
+    
     var tr = e.target.closest('tr');
-    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML); //e is a event object
+    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML); 
     var delid = parseInt(e.target.closest('tr').querySelector('td:first-child').innerHTML);
     console.log(delid);
     swal({
@@ -49,8 +49,8 @@ function App5() {
 
        //API Call
        try {
-          //let po = await axios(); 
-          let po = await axios.delete('http://localhost:1337/api/siblings/'+delid)
+          
+          let po = await axios.delete(`${config.dev_url}/api/siblings/`+delid)
              tr.remove();
           
           swal("Record Delete Successfully");
@@ -72,39 +72,32 @@ function App5() {
   }
 
   
-
-  let getStudents2 = (e)=>{
-    console.log(student);
-
-  }
-  let getStudents = (pageno=1)=>{// e = event //ES6 Fat arrow functions // default argument
+  
+  let getStudents = (pageno=1)=>{
 
     console.log('good morning')
-    //Alway wrap the api calling code inside trycatch block
+  
     try {
-        //Call the api
-        // Fetch API
-        //AXIOS
-        //What is the api
+        
         //Fetch API with Promise Chain
         fetch(`http://localhost:1337/api/siblings?pagination[page]=${pageno}&pagination[pageSize]=10`)
         .then((data)=>{
-          //let make data json readable
+          //let make data json readable 
           return data.json();
         }).then((data)=>{
           console.log(data);
-          //Set karne se pahle
-          //console.log('before set',student);
-          //not set the student data in student hook variable
+          
+          
+          
           setStudent({
             ...student,
-            data: student.data.concat(data.data), //1. Array student.data  //2. data.data
+            data: student.data.concat(data.data), 
             meta:data.meta
           });
-          //Set karne ke baad data kya hai
           
           
-          //array.map(function(currentValue, index, arr));
+          
+        
         }).catch((err)=>{
           console.log(err);
         });
@@ -122,7 +115,7 @@ function App5() {
         </div>
         
         <br />
-        <br />
+        
         {
           student.data.length > 0 &&
           <React.Fragment>
