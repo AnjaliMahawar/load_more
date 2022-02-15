@@ -1,21 +1,42 @@
 import logo from './logo.svg';
 import './App.css';
 //  { Named Import }
-
 import { Button, Form, Pagination, Table } from 'react-bootstrap';
 import React, { useState } from 'react';
 import swal from 'sweetalert';
-import axios from 'axios';
-//import swal from 'sweetalert';
-
-//const axios = require('axios');
-//const config = //require('./config.json')
+const axios = require('axios');
 
 // Functional COmpoent
-let handleDlt=(e)=>{
-    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML);
-    var del_id =  parseInt(e.target.closest('tr').querySelector('td:first-child').innerHTML)
-    console.log(del_id)
+function App5() {
+  //1. State/ Hook Variables
+  const [student,setStudent] = useState({
+    data:[], //array
+    meta:{
+        pagination:{
+            page: '',
+            pageCount: '',
+            pageSize: '',
+            total: ''
+        }
+    } //js object
+  });//Empty Array
+  const [paginationItem,setPaginationItem] = useState([])// Empty Array
+  //2. Functions defination
+
+  let LoadMore=()=>{
+   // alert('ooooo');
+    getStudents(student.meta.pagination.page +1)
+  }
+  
+  
+  
+
+  let handleDelete = (e)=>{
+    //function chaining
+    var tr = e.target.closest('tr');
+    console.log(e.target.closest('tr').querySelector('td:first-child').innerHTML); //e is a event object
+    var delid = parseInt(e.target.closest('tr').querySelector('td:first-child').innerHTML);
+    console.log(delid);
     swal({
       title: "Are you sure?",
       text: "Once deleted, you will not be able to recover this imaginary file!",
@@ -23,67 +44,41 @@ let handleDlt=(e)=>{
       buttons: true,
       dangerMode: true,
     })
-    .then(async(willDelete) => {
+    .then( async (willDelete) => {
       if (willDelete) {
-        try {
-            let po = await axios();
+
+       //API Call
+       try {
+          //let po = await axios(); 
+          let po = await axios.delete('http://localhost:1337/api/siblings/'+delid)
+             tr.remove();
           
-        } catch (error) {
-          console.log(error)
-          
-        }
+          swal("Record Delete Successfully");
         
+          
+       } catch (error) {
+          console.log(error)
+       }
       } else {
-    
-}
+        //swal("Your imaginary file is safe!");
+      }
+    });
+  }
 
-function App() {
-  //1. State/ Hook Variables
-  const [student,setStudent] = useState({
-    data:[]
-  });//Empty Array
-  const [paginationItem,setPaginationItem] = useState([])// Empty Array
-
-  //2. Functions defination
-  
   let goToPage = (e)=>{
     console.log(e.target.innerHTML);
     var pageno = parseInt(e.target.innerHTML);
     getStudents(pageno);
   }
-  let first = (e)=>{
-    console.log('First');
-    if(student.meta.pagination.page !== 1){
-      getStudents(1); // Actual Arguemtn
-    }
-    
-    
-  }
-  let last = (e)=>{
-    console.log('Last');
-    if(student.meta.pagination.page !== student.meta.pagination.pageCount){
-      getStudents(student.meta.pagination.pageCount);
-    }
-  }
-  let prev = (e)=>{
-    console.log('Prev');
-    if(student.meta.pagination.page !== 1){
-      getStudents(student.meta.pagination.page - 1 );
-    }
-    
-  }
-  let next = (e)=>{
-    console.log('Next');
-    if(student.meta.pagination.page !== student.meta.pagination.pageCount){
-      getStudents(student.meta.pagination.page + 1);
-    }
-    
-  }
+
+  
+
   let getStudents2 = (e)=>{
     console.log(student);
+
   }
   let getStudents = (pageno=1)=>{// e = event //ES6 Fat arrow functions // default argument
-  
+
     console.log('good morning')
     //Alway wrap the api calling code inside trycatch block
     try {
@@ -101,19 +96,14 @@ function App() {
           //Set karne se pahle
           //console.log('before set',student);
           //not set the student data in student hook variable
-          setStudent(data);
+          setStudent({
+            ...student,
+            data: student.data.concat(data.data), //1. Array student.data  //2. data.data
+            meta:data.meta
+          });
           //Set karne ke baad data kya hai
-          var start = data.meta.pagination.page
-          var arr = []; //empty array;
-          for (let i = 1; i <= data.meta.pagination.pageCount; i++) {
-            if(i == start){
-              arr.push(<Pagination.Item active onClick={(e)=>{ goToPage(e) }}>{i}</Pagination.Item>); 
-            }else{
-              arr.push(<Pagination.Item onClick={(e)=>{ goToPage(e) }}>{i}</Pagination.Item>);
-            }
-            
-          }
-          setPaginationItem(arr)
+          
+          
           //array.map(function(currentValue, index, arr));
         }).catch((err)=>{
           console.log(err);
@@ -126,8 +116,9 @@ function App() {
   return (
     <>
         <div className="d-flex justify-content-center">
-          <h1>Read Operation</h1>
-          <Button onClick={(e)=>{ getStudents() }}>Get My Friends</Button>
+          <h1 className='offset-1'>Load More Operation</h1>
+         
+          <Button  onClick={(e)=>{ getStudents() }}>Get_My_Student</Button> 
         </div>
         
         <br />
@@ -154,9 +145,8 @@ function App() {
                           <td>{arr[index].attributes.name}</td>
                           <td>
                             <Button variant="success" size="sm">View</Button>&nbsp;
-                            <Button variant="primary" size="sm">Edit</Button>&nbsp;
-                            <Button variant="danger" onClick={(e)=>{handleDlt(e)}} size="sm">Delete</Button>
-                           
+                            <Button variant="primary"  size="sm">Edit</Button>&nbsp;
+                            <Button variant="danger" onClick={(e)=>{ handleDelete(e) }} size="sm">Delete</Button>
                           </td>
                         </tr>
                     )//JSX
@@ -165,23 +155,18 @@ function App() {
                 
               </tbody>
             </Table>
-            <Pagination className="d-flex justify-content-center">
-              <Pagination.First onClick={(e)=>{ first(e); }} />
-              <Pagination.Prev onClick={(e)=>{ prev(e); }} />
-              {
-              
-                paginationItem.map(function(currentValue, index, arr){
-                    return currentValue//JSX
-                })
-              }
-              
-              <Pagination.Next onClick={(e)=>{ next(e); }} />
-              <Pagination.Last onClick={(e)=>{ last(e); }} />
-            </Pagination>
+            { (student.meta.pagination.page !== student.meta.pagination.pageCount)&&
+                  <Button className='mt-3 offset-5' onClick={(e)=>{LoadMore(e)}}>load More
+     
+                  </Button>
+
+            }
+            
           </React.Fragment>
+          
         }
-        
+       
     </>
   );
 }
-export default App;
+export default App5;
